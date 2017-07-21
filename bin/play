@@ -125,7 +125,7 @@ class Logs
   end
 
   private def match_file?(matcher)
-    crnt.fetch(:path)[matcher]
+    crnt.fetch(:path)&.[](matcher)
   end
 
   private def match_event?(event)
@@ -345,7 +345,7 @@ trap('SIGWINCH') { height, width = stdout.winsize }
 
 # hide cursor when running, make sure to show again whenever we leave the program
 stdout.hide_cursor
-at_exit { stdout.show_cursor }
+at_exit { stdout << "\n" << :show_cursor }
 
 # SIGTSTP puts the process into the background, SIGCONT puts it into the foreground
 bg_orig = nil
