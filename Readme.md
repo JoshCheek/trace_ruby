@@ -1,18 +1,28 @@
+Trace Ruby
+==========
+
 Records a Ruby execution path and plays it back.
 
-Example recording:
+Record the examples:
 
 ```sh
 # A simple one-file example
-$ ruby plain_ruby_example.rb
+$ ruby -I lib examples/plain_ruby_example.rb
 
 # See how Sinatra handles a get request
-$ rackup config.ru
-# now make a request to the root and then kill it
+$ rackup -I lib examples/config.ru # now make a request to the root and then kill it
 ```
 
-Example playback:
+Play the logs back
 
 ```sh
-$ ruby play.rb
+$ ruby bin/play              # most recent log
+$ ruby bin/play whatever.log # some specific log
+```
+
+Adding your own recording:
+
+```ruby
+require 'trace_ruby/record'
+Record { puts "your code here!" }
 ```

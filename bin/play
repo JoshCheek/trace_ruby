@@ -1,7 +1,10 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.realdirpath('../lib', __dir__)
+
 require 'coderay'
 require 'readline'
 require 'io/console'
-require_relative 'log'
+require 'trace_ruby/log'
 
 logname = ARGV[0] || Dir['*.log'].sort_by { |name| name.scan(/\d+/).map &:to_i }.last
 logname or abort "No log file provided or found!"
@@ -57,7 +60,7 @@ def display_file(log:, stdout:, height:, path:, lineno:, event:, method:nil, hid
 end
 
 
-class Log
+class Logs
   attr_reader :index
   def initialize(index:, logs:)
     @index = index
@@ -162,7 +165,7 @@ def self.read_logfile(filename)
   logs
 end
 
-log = Log.new index: 0, logs: begin
+log = Logs.new index: 0, logs: begin
   logs = read_logfile logname
   logs.unshift path: 'splash screen', lineno: 0, event: 'Play logs', hide_filename: true, hide_linenos: true
   splash_screen = <<~SPLASH_SCREEN

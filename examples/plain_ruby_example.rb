@@ -1,4 +1,4 @@
-require_relative 'record'
+require 'trace_ruby/record'
 Record do
   class A
     def square(a)
