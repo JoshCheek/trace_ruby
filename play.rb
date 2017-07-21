@@ -12,7 +12,7 @@ end
 
 def self.files
   @files ||= Hash.new do |h, filename|
-    body = File.exist?(filename) ?  File.read(filename) : ""
+    body = File.exist?(filename) ? File.read(filename) : ""
     h[filename] = body
   end
 end
@@ -73,17 +73,15 @@ class Log
   end
 
   def next
-    wrap_index 1
-  end
-
-  def to_index(index)
-    @index = index
-    to_last if after_last?
-    to_first if before_first?
+    move_bounded @index+1
   end
 
   def prev
-    wrap_index -1
+    move_bounded @index-1
+  end
+
+  def to_index(index)
+    move_bounded index
   end
 
   def to_first
@@ -109,6 +107,12 @@ class Log
 
   def search_backward(matcher)
     self.prev until match_file?(matcher) || at_beginning?
+  end
+
+  private def move_bounded(index)
+    @index = index
+    to_last if after_last?
+    to_first if before_first?
   end
 
   private def wrap_index(offset)
@@ -304,7 +308,7 @@ class TtyOut < Out
     text.gsub /^(  \S+)/, "\e[95m\\1\e[0m"
   end
 
-  private def highlight_ruby(ruby)
+  def highlight_ruby(ruby)
     CodeRay.encode ruby, :ruby, :terminal
   end
 end
