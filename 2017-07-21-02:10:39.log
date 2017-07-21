@@ -1,0 +1,22 @@
+73:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:b_call:method071:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:	line:method083:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:c_call:method:inherited85:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:c_return:method:inherited72:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:
+class:method071:{	:	pathI"plain_ruby_example.rb:ET:linenoi	:
+event:	line:method086:{	:	pathI"plain_ruby_example.rb:ET:linenoi	:
+event:c_call:method:method_added88:{	:	pathI"plain_ruby_example.rb:ET:linenoi	:
+event:c_return:method:method_added70:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:end:method071:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:	line:method077:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:c_call:method:new84:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:c_call:method:initialize86:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:c_return:method:initialize79:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:c_return:method:new71:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:	line:method078:{	:	pathI"plain_ruby_example.rb:ET:linenoi	:
+event:	call:method:square78:{	:	pathI"plain_ruby_example.rb:ET:linenoi
+:
+event:	line:method:square80:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:return:method:square75:{	:	pathI"plain_ruby_example.rb:ET:linenoi:
+event:b_return:method0

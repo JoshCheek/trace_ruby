@@ -1,5 +1,3 @@
-require 'json'
-
 def Record(*args, &block)
   Record.call(*args, &block)
 end
@@ -13,18 +11,19 @@ module Record
     :thread_begin, :thread_end, :fiber_switch,
   ]
 
-  def self.call(events:EVENTS, filename:"#{Time.now.strftime '%F-%T'}.log")
-    log = File.open filename, "w"
-    events = []
+  # When events is empty, it records all events
+  def self.call(events:[], filename:"#{Time.now.strftime '%F-%T'}.log")
+    logs = File.open filename, "w"
     tp = TracePoint.new *events do |tp|
       next if IGNORE_FILES.include? tp.path
-      log.puts({path: tp.path, lineno: tp.lineno, event: tp.event, method: tp.method_id}.to_json)
+      dump = Marshal.dump path: tp.path, lineno: tp.lineno, event: tp.event, method: tp.method_id
+      logs.print "#{dump.bytesize}:#{dump}"
     end
     tp.enable
     yield
   ensure
     tp&.disable
-    log&.close if log && !log.closed?
+    logs&.close if logs && !logs.closed?
   end
 
   class Rack

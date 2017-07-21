@@ -1,4 +1,3 @@
-require 'json'
 require 'coderay'
 require 'readline'
 require 'io/console'
@@ -142,10 +141,24 @@ class Log
   end
 end
 
+def self.read_logfile(filename)
+  logs = []
+  File.open filename, 'r' do |f|
+    until f.eof?
+      len = ''
+      loop do
+        chr = f.readbyte.chr
+        break if chr == ':'
+        len << chr
+      end
+      logs << Marshal.load(f.read len.to_i)
+    end
+  end
+  logs
+end
+
 log = Log.new index: 0, logs: begin
-  logs = File.readlines(logname)
-             .map { |line| JSON.parse line, symbolize_names: true }
-             .each { |log| log[:event] = log[:event].intern if log.key? :event }
+  logs = read_logfile logname
   logs.unshift path: 'splash screen', lineno: 0, event: 'Play logs', hide_filename: true, hide_linenos: true
   splash_screen = <<~SPLASH_SCREEN
     Information
