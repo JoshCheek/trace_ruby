@@ -1,3 +1,5 @@
+require_relative 'log'
+
 def Record(*args, &block)
   Record.call(*args, &block)
 end
@@ -16,7 +18,8 @@ module Record
     logs = File.open filename, "w"
     tp = TracePoint.new *events do |tp|
       next if IGNORE_FILES.include? tp.path
-      dump = Marshal.dump path: tp.path, lineno: tp.lineno, event: tp.event, method: tp.method_id
+      log  = Log.new tp.path, tp.lineno, tp.event, tp.method_id
+      dump = Marshal.dump log
       logs.print "#{dump.bytesize}:#{dump}"
     end
     tp.enable

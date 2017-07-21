@@ -1,0 +1,22 @@
+82:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:b_call:@method080:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:	line:@method092:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:c_call:@method:inherited94:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:c_return:@method:inherited81:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:
+class:@method080:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi	:@event:	line:@method095:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi	:@event:c_call:@method:method_added97:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi	:@event:c_return:@method:method_added79:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:end:@method080:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:	line:@method086:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:c_call:@method:new93:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:c_call:@method:initialize95:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:c_return:@method:initialize88:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:c_return:@method:new80:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:	line:@method087:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi	:@event:	call:@method:square87:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi
+:@event:	line:@method:square89:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:return:@method:square84:o:Log	:
+@pathI"plain_ruby_example.rb:ET:@linenoi:@event:b_return:@method0

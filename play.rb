@@ -1,6 +1,7 @@
 require 'coderay'
 require 'readline'
 require 'io/console'
+require_relative 'log'
 
 logname = ARGV[0] || Dir['*.log'].sort_by { |name| name.scan(/\d+/).map &:to_i }.last
 logname or abort "No log file provided or found!"
