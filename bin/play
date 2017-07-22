@@ -59,36 +59,6 @@ def display_file(log:, stdout:, height:, path:, lineno:, event:, method:nil, hid
   stdout << :last_line
 end
 
-
-
-log = TraceRuby::Navigator.from_stream File.open(logname, 'r')
-
-  # logs.unshift path: 'splash screen', lineno: 0, event: 'Play logs', hide_filename: true, hide_linenos: true
-  # splash_screen = <<~SPLASH_SCREEN
-  #   Information
-  #     log-file #{logname}
-  #     num-logs #{logs.length}
-
-  #   Controls
-  #     j   To next
-  #     k   To previous
-  #     #   To log number
-  #     g   To beginning
-  #     G   To end
-  #     s   Skip forward
-  #     l   Skip to next line event
-  #     /   Find forward
-  #     ?   Find backward
-  #     C-l Redraw
-  #     q   Quit
-  # SPLASH_SCREEN
-  # files['splash screen'] = splash_screen
-  # def splash_screen.type
-  #   :splash_screen
-  # end
-  # logs
-# end
-
 class In < Struct.new(:stdin)
   def initialize(stdin:)
     super stdin
@@ -167,9 +137,8 @@ class Out < Struct.new(:stdout)
   def interpret(obj)
     obj.to_s
   end
-  def highlight(text)
-    return highlight_default text unless text.respond_to? :type
-    case text.type
+  def highlight(text, type: :ruby)
+    case type
     when :ruby
       highlight_ruby text
     when :splash_screen
@@ -264,29 +233,63 @@ end
 
 
 
+
+
+nav = TraceRuby::Navigator.from_stream File.open(logname, 'r')
+
+splash_screen = <<~SPLASH_SCREEN
+Information
+  nav-file   #{logname}
+  num-events #{nav.length}
+
+Controls
+  h   This help screen
+  j   To next
+  k   To previous
+  #   To log number
+  g   To beginning
+  G   To end
+  s   Skip forward
+  l   Skip to next line event
+  /   Find forward
+  ?   Find backward
+  C-l Redraw
+  q   Quit
+SPLASH_SCREEN
+
+state = :help
 loop do
-  display_file log: log, stdout: stdout, height: height, **log.crnt
+  if state == :help
+    stdout.clear_screen
+    stdout.puts stdout.highlight(splash_screen, type: :splash_screen)
+    state = :display
+  else
+    display_file log: nav, stdout: stdout, height: height, **nav.crnt
+  end
+
   case stdin.getch
+  when 'h'
+    state = :help
   when 'j', "\n"
-    log.next
+    nav.next
   when 'k'
-    log.prev
+    nav.prev
   when  'g'
-    log.to_first
+    nav.to_first
   when 'G'
-    log.to_last
+    nav.to_last
   when '#'
     result = prompt('event number: ')
     index  = result.to_i
-    log.to_index index if index.to_s == result
+    nav.to_index index if index.to_s == result
   when 's'
-    log.skip prompt('skip: ')
+    nav.skip prompt('skip: ')
   when 'l'
-    log.search_forward :line
+    nav.search_forward :line
   when '/'
-    log.search_forward prompt('search forward: ')
+    nav.search_forward prompt('search forward: ')
   when '?'
-    log.search_backward prompt('search backward: ')
+    nav.search_backward prompt('search backward: ')
   when ?\C-l
     # noop, it draws at the beginning of the loop
   when ?\C-z
