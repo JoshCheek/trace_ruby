@@ -38,8 +38,8 @@ RSpec.describe 'Record' do
 
     specify 'line advancement' do
       assert_toggleable :lines do |assertions|
-        assertions << -> e { e.lineno = __LINE__ }
-        assertions << -> e { e.lineno = __LINE__ }
+        assertions << -> e { e.lineno == __LINE__ }
+        assertions << -> e { e.lineno == __LINE__ }
       end
     end
 
@@ -49,18 +49,26 @@ RSpec.describe 'Record' do
         end
         module Comparable
         end
-        lines = {open1: __LINE__-4, close1: __LINE__-3, open2: __LINE__-2, close2: __LINE__-1 }
-        lines.each do |name, lineno|
-          if /open/=~name
-            assertions << -> e { e.lineno == lineno && e.open? && !e.close? }
-          else
-            assertions << -> e { e.lineno == lineno && !e.open? && e.close? }
-          end
+        lines = { __LINE__-4 => __LINE__-3, __LINE__-2 => __LINE__-1 }
+        lines.each do |beginno, endno|
+          assertions << -> e { e.lineno == beginno &&  e.begin? && !e.end? }
+          assertions << -> e { e.lineno == endno   && !e.begin? &&  e.end? }
         end
       end
     end
 
-    specify 'method call / return (Ruby and C)'
+    ruby_line = __LINE__; def a_method; end
+    specify 'method call / return (Ruby and C)' do
+      assert_toggleable :methods do |assertions|
+        c_line = __LINE__; Object.new
+        a_method
+        assertions << -> e { e.lineno == c_line    &&  e.begin? && !e.end? && e.method == :new }
+        assertions << -> e { e.lineno == c_line    && !e.begin? &&  e.end? && e.method == :new }
+        assertions << -> e { e.lineno == ruby_line &&  e.begin? && !e.end? && e.method == :a_method }
+        assertions << -> e { e.lineno == ruby_line && !e.begin? &&  e.end? && e.method == :a_method }
+      end
+    end
+
     specify 'block call / return'
     specify 'thread beginning and ending'
     specify 'switching fibers'

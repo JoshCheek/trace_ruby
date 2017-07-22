@@ -6,17 +6,18 @@ module TraceRuby
       case type
       when :lines   then event == :line
       when :modules then event == :class || event == :end
+      when :methods then event == :call || event == :return || event == :c_call || event == :c_return
       else
         raise "Invalid type: #{type.inspect}"
       end
     end
 
-    def open?
-      event == :class
+    def begin?
+      event == :class || event == :call || event == :c_call
     end
 
-    def close?
-      event == :end
+    def end?
+      event == :end || event == :return || event == :c_return
     end
   end
 end

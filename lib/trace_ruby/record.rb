@@ -9,8 +9,7 @@ module TraceRuby
     IGNORE_FILES = []
     IGNORE_FILES << File.expand_path(__FILE__)
     EVENTS = [
-      :call, :return, :c_call,
-      :c_return, :raise, :b_call, :b_return,
+      :raise, :b_call, :b_return,
       :thread_begin, :thread_end, :fiber_switch,
     ]
 
@@ -24,6 +23,7 @@ module TraceRuby
       filename: default_filename,
       lines:    true,
       modules:  true,
+      methods:  true,
       &to_record
     )
       @events      = events
@@ -33,6 +33,7 @@ module TraceRuby
       @event_names = []
       lines   and @event_names << :line
       modules and @event_names << :class << :end
+      methods and @event_names << :call << :return << :c_call << :c_return
     end
 
     def call
