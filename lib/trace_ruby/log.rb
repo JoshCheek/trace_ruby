@@ -8,8 +8,7 @@ module TraceRuby
       when :modules then event == :class || event == :end
       when :methods then event == :call || event == :return || event == :c_call || event == :c_return
       when :blocks  then event == :b_call || event == :b_return
-      else
-        raise "Invalid type: #{type.inspect}"
+      else raise "Invalid type: #{type.inspect}"
       end
     end
 

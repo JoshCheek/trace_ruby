@@ -8,8 +8,8 @@ module TraceRuby
   class Record
     IGNORE_FILES = [File.expand_path(__FILE__)]
 
-    def self.call(**args, &block)
-      new(**args, &block).call
+    def self.call(*args, &block)
+      new(*args, &block).call
     end
 
     def initialize(

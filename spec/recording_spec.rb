@@ -79,17 +79,42 @@ RSpec.describe 'Record' do
       end
     end
 
-    specify 'error raising'
-      # :raise
-    specify 'thread beginning and ending'
-      # :thread_begin, :thread_end
-    specify 'switching fibers'
-      # :fiber_switch
+    specify 'error raising' # :raise
+    specify 'thread beginning and ending' # :thread_begin, :thread_end
+    specify 'switching fibers' # :fiber_switch
   end
 
   describe 'logging' do
-    specify 'by defualt it logs to a file with the current date/time'
-    it 'can be given a custom logfilename'
-    it 'can be given a stream to log to'
+    def get_logs
+      Dir['*.log']
+    end
+
+    around :each do |spec|
+      Dir.chdir __dir__ do
+        get_logs.each { |filename| File.delete filename }
+        spec.call
+      end
+    end
+
+    specify 'by defualt it logs to a file in the current dir with the current date/time' do
+      time = Time.now
+      Record { }
+      logs = get_logs
+      expect(logs.length).to eq 1
+      logtime = Time.new(*logs.first.scan(/\d+/).map(&:to_i))
+      expect(logtime).to be_within(1).of(time)
+    end
+
+    it 'can be given a custom logfilename' do
+      Record(filename: 'lol.log') { }
+      expect(get_logs).to eq ['lol.log']
+    end
+
+    it 'can be given a stream to log to' do
+      stream = StringIO.new
+      Record(stream: stream) { }
+      expect(get_logs).to be_empty
+      expect(stream.string).to_not be_empty
+    end
   end
 end
