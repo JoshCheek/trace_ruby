@@ -7,17 +7,18 @@ module TraceRuby
       when :lines   then event == :line
       when :modules then event == :class || event == :end
       when :methods then event == :call || event == :return || event == :c_call || event == :c_return
+      when :blocks  then event == :b_call || event == :b_return
       else
         raise "Invalid type: #{type.inspect}"
       end
     end
 
     def begin?
-      event == :class || event == :call || event == :c_call
+      event == :class || event == :call || event == :c_call || event == :b_call
     end
 
     def end?
-      event == :end || event == :return || event == :c_return
+      event == :end || event == :return || event == :c_return || event == :b_return
     end
   end
 end

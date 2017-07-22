@@ -69,10 +69,22 @@ RSpec.describe 'Record' do
       end
     end
 
-    specify 'block call / return'
+    specify 'block call / return' do
+      assert_toggleable :blocks do |assertions|
+        lambda do
+        end.call
+        beginno, endno = __LINE__-2, __LINE__-1
+        assertions << -> e { e.lineno == beginno &&  e.begin? && !e.end? }
+        assertions << -> e { e.lineno == endno   && !e.begin? &&  e.end? }
+      end
+    end
+
+    specify 'error raising'
+      # :raise
     specify 'thread beginning and ending'
+      # :thread_begin, :thread_end
     specify 'switching fibers'
-    specify 'by default it logs all of these'
+      # :fiber_switch
   end
 
   describe 'logging' do
