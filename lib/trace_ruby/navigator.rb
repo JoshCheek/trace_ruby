@@ -5,6 +5,7 @@ module TraceRuby
     def initialize(stream)
       @stream = stream
       @events = []
+      @index  = 0
       until stream.eof?
         len = ''
         loop do
@@ -24,17 +25,40 @@ module TraceRuby
     def each(&block)
       @events.each(&block)
     end
+
+    def crnt
+      @events[@index]
+    end
+
+    def next
+      @index += 1
+    end
+
+    def to_first
+      @index = 0
+    end
+
+    def to_last
+      @index = length - 1
+    end
+
+    def to_index(index)
+      disparity = index-@index
+      if disparity < 0
+        call = proc { self.prev }
+      else
+        call = proc { self.next }
+      end
+      disparity.abs.times &call
+    end
   end
 
   class Navigator
     def self.from_stream(stream)
-      new index: 0, cursor: FileCursor.new(stream)
+      new cursor: FileCursor.new(stream)
     end
 
-    attr_reader :index
-
-    def initialize(index:, cursor:)
-      @index  = index
+    def initialize(cursor:)
       @cursor = cursor
     end
 
@@ -43,27 +67,32 @@ module TraceRuby
     end
 
     def crnt
-      @cursor[@index]
+      @cursor.crnt
     end
 
     def next
-      move_bounded @index+1
+      @cursor.next
+      self
     end
 
     def prev
-      move_bounded @index-1
+      @cursor.prev
+      self
     end
 
     def to_index(index)
-      move_bounded index
+      @cursor.to_index index
+      self
     end
 
     def to_first
-      @index = 0
+      @cursor.to_first
+      self
     end
 
     def to_last
-      @index = @cursor.length - 1
+      @cursor.to_last
+      self
     end
 
     def skip(matcher)
