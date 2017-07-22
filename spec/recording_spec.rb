@@ -3,6 +3,8 @@ require 'trace_ruby/navigator'
 require 'stringio'
 
 RSpec.describe 'Record' do
+  include TraceRuby
+
   def cursor(**args, &b)
     stream = StringIO.new
     Record(**args, stream: stream, &b)

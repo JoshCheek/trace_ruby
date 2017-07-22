@@ -1,10 +1,13 @@
 require 'trace_ruby/log'
 
-def Record(*args, &block)
-  TraceRuby::Record.call(*args, &block)
-end
-
 module TraceRuby
+  TOPLEVEL_BINDING.receiver.extend self
+  extend self
+
+  def Record(*args, &block)
+    TraceRuby::Record.call(*args, &block)
+  end
+
   class Record
     IGNORE_FILES = [File.expand_path(__FILE__)]
 
