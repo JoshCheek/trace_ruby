@@ -83,8 +83,8 @@ module TraceRuby
       case type
       when :ruby
         highlight_ruby text
-      when :splash_screen
-        highlight_splash_screen text
+      when :help_screen
+        highlight_help_screen text
       else
         text.to_s
       end
@@ -94,7 +94,7 @@ module TraceRuby
       text.to_s
     end
     alias highlight_ruby highlight_default
-    alias highlight_splash_screen highlight_default
+    alias highlight_help_screen highlight_default
   end
 
 
@@ -105,16 +105,16 @@ module TraceRuby
 
     def interpret(obj)
       return "" if obj == :last_line
-      return ANSI.fetch(obj) { obj.to_s } unless Array === obj
+      return ANSI.fetch obj, &:to_s unless Array === obj
       name, *args = obj
-      ANSI.fetch(name).call(*args)
+      ANSI.fetch(name).(*args)
     end
 
     def highlight_default(text)
       highlight_ruby text
     end
 
-    def highlight_splash_screen(text)
+    def highlight_help_screen(text)
       text.gsub /^(  \S+)/, "\e[95m\\1\e[0m"
     end
 

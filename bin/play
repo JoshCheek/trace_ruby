@@ -20,7 +20,7 @@ def self.files
   end
 end
 
-def display_file(log:, stdout:, height:, path:, lineno:, event:, method:nil, hide_filename: false, hide_linenos: false)
+def self.display_file(log:, stdout:, height:, path:, lineno:, event:, method:nil, hide_filename: false, hide_linenos: false)
   header_size  = 2
   header_size -= 1 if hide_filename
   file_lines   = file_linenos stdout.highlight files[path]
@@ -69,6 +69,13 @@ stdout = $stdout.tty? ? TtyOut.new(stdout: $stdout) : FileOut.new(stdout: $stdou
 height, width = stdout.winsize
 trap('SIGWINCH') { height, width = stdout.winsize }
 
+# using metaprogramming so I can access the `height` local var
+define_singleton_method :prompt do |message, lineno: height|
+  stdout.goto_line lineno
+  stdout.clear_line
+  Readline.readline message, true
+end
+
 # hide cursor when running, make sure to show again whenever we leave the program
 stdout.hide_cursor
 at_exit { stdout << "\n" << :show_cursor }
@@ -80,16 +87,10 @@ bg_trap = proc do
   trap 'SIGTSTP', bg_orig
   Process.kill 'SIGTSTP', $$
 end
-bg_orig = trap 'SIGTSTP', &bg_trap
+bg_orig = trap 'SIGTSTP', bg_trap
 trap 'SIGCONT' do
   bg_orig = trap 'SIGTSTP', bg_trap
   stdout.hide_cursor
-end
-
-define_singleton_method :prompt do |message, lineno: height|
-  stdout.goto_line lineno
-  stdout.clear_line
-  Readline.readline message, true
 end
 
 
@@ -98,7 +99,7 @@ end
 
 nav = TraceRuby::Navigator.from_stream File.open(logname, 'r')
 
-splash_screen = <<~SPLASH_SCREEN
+help_screen = <<HELP_SCREEN
 Information
   nav-file   #{logname}
   num-events #{nav.length}
@@ -116,13 +117,13 @@ Controls
   ?   Find backward
   C-l Redraw
   q   Quit
-SPLASH_SCREEN
+HELP_SCREEN
 
 state = :help
 loop do
   if state == :help
     stdout.clear_screen
-    stdout.puts stdout.highlight(splash_screen, type: :splash_screen)
+    stdout.puts stdout.highlight(help_screen, type: :help_screen)
     state = :display
   else
     display_file log: nav, stdout: stdout, height: height, **nav.crnt
