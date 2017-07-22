@@ -5,7 +5,7 @@ def Record(*args, &block)
 end
 
 module TraceRuby
-  module Record
+  class Record
     IGNORE_FILES = []
     IGNORE_FILES << File.expand_path(__FILE__)
     EVENTS = [
@@ -14,20 +14,36 @@ module TraceRuby
       :thread_begin, :thread_end, :fiber_switch,
     ]
 
-    # When events is empty, it records all events
-    def self.call(events:[], filename:"#{Time.now.strftime '%F-%T'}.log")
-      logs = File.open filename, "w"
-      tp = TracePoint.new *events do |tp|
+    def self.call(**args, &block)
+      new(**args, &block).call
+    end
+
+    def initialize(events:[], stream: nil, filename:default_filename, &to_record)
+      @events    = events
+      @stream    = stream
+      @filename  = filename
+      @to_record = to_record
+    end
+
+    def call
+      @stream ||= File.open @filename, "w"
+      tp = TracePoint.new do |tp|
         next if IGNORE_FILES.include? tp.path
         log  = Log.new tp.path, tp.lineno, tp.event, tp.method_id
         dump = Marshal.dump log
-        logs.print "#{dump.bytesize}:#{dump}"
+        @stream.print "#{dump.bytesize}:#{dump}"
       end
       tp.enable
-      yield
+      @to_record.call
     ensure
       tp&.disable
-      logs&.close if logs && !logs.closed?
+      @stream&.close if @stream && !@stream.closed? && @filename
+    end
+
+    private
+
+    def default_filename
+      "#{Time.now.strftime '%F-%T'}.log"
     end
   end
 end
