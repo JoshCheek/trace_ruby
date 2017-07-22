@@ -4,7 +4,7 @@ $LOAD_PATH.unshift File.realdirpath('../lib', __dir__)
 require 'coderay'
 require 'readline'
 require 'io/console'
-require 'trace_ruby/log'
+require 'trace_ruby/navigator'
 
 logname = ARGV[0] || Dir['*.log'].sort_by { |name| name.scan(/\d+/).map &:to_i }.last
 logname or abort "No log file provided or found!"
@@ -60,138 +60,34 @@ def display_file(log:, stdout:, height:, path:, lineno:, event:, method:nil, hid
 end
 
 
-class Logs
-  attr_reader :index
-  def initialize(index:, logs:)
-    @index = index
-    @logs  = logs
-  end
 
-  def length
-    @logs.length
-  end
+log = TraceRuby::Navigator.from_stream File.open(logname, 'r')
 
-  def crnt
-    @logs[@index]
-  end
+  # logs.unshift path: 'splash screen', lineno: 0, event: 'Play logs', hide_filename: true, hide_linenos: true
+  # splash_screen = <<~SPLASH_SCREEN
+  #   Information
+  #     log-file #{logname}
+  #     num-logs #{logs.length}
 
-  def next
-    move_bounded @index+1
-  end
-
-  def prev
-    move_bounded @index-1
-  end
-
-  def to_index(index)
-    move_bounded index
-  end
-
-  def to_first
-    @index = 0
-  end
-
-  def to_last
-    @index = @logs.length - 1
-  end
-
-  def skip(matcher)
-    self.next while match_file?(matcher) && !at_end?
-  end
-
-  def search_forward(matcher)
-    matchers = []
-    matchers << -> { at_end? }
-    matchers << -> { match_file?  matcher } if Regexp === matcher || String === matcher
-    matchers << -> { match_event? matcher } if Symbol === matcher
-    self.next
-    self.next until matchers.any? &:call
-  end
-
-  def search_backward(matcher)
-    self.prev until match_file?(matcher) || at_beginning?
-  end
-
-  private def move_bounded(index)
-    @index = index
-    to_last if after_last?
-    to_first if before_first?
-  end
-
-  private def wrap_index(offset)
-    @index += offset
-    to_last  if before_first?
-    to_first if after_last?
-  end
-
-  private def match_file?(matcher)
-    crnt.fetch(:path)&.[](matcher)
-  end
-
-  private def match_event?(event)
-    crnt.fetch(:event) == event
-  end
-
-  private def at_beginning?
-    @index.zero?
-  end
-
-  private def at_end?
-    @logs.length == @index.succ
-  end
-
-  private def before_first?
-    @index < 0
-  end
-
-  private def after_last?
-    @logs.length <= @index
-  end
-end
-
-def self.read_logfile(filename)
-  logs = []
-  File.open filename, 'r' do |f|
-    until f.eof?
-      len = ''
-      loop do
-        chr = f.readbyte.chr
-        break if chr == ':'
-        len << chr
-      end
-      logs << Marshal.load(f.read len.to_i)
-    end
-  end
-  logs
-end
-
-log = Logs.new index: 0, logs: begin
-  logs = read_logfile logname
-  logs.unshift path: 'splash screen', lineno: 0, event: 'Play logs', hide_filename: true, hide_linenos: true
-  splash_screen = <<~SPLASH_SCREEN
-    Information
-      log-file #{logname}
-      num-logs #{logs.length}
-
-    Controls
-      j   To next
-      k   To previous
-      #   To log number
-      g   To beginning
-      G   To end
-      s   Skip forward
-      l   Skip to next line event
-      /   Find forward
-      ?   Find backward
-      C-l Redraw
-      q   Quit
-  SPLASH_SCREEN
-  files['splash screen'] = splash_screen
-  def splash_screen.type
-    :splash_screen
-  end
-  logs
-end
+  #   Controls
+  #     j   To next
+  #     k   To previous
+  #     #   To log number
+  #     g   To beginning
+  #     G   To end
+  #     s   Skip forward
+  #     l   Skip to next line event
+  #     /   Find forward
+  #     ?   Find backward
+  #     C-l Redraw
+  #     q   Quit
+  # SPLASH_SCREEN
+  # files['splash screen'] = splash_screen
+  # def splash_screen.type
+  #   :splash_screen
+  # end
+  # logs
+# end
 
 class In < Struct.new(:stdin)
   def initialize(stdin:)

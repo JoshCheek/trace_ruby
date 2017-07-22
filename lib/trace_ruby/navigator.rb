@@ -17,6 +17,10 @@ module TraceRuby
       end
     end
 
+    def index
+      @index
+    end
+
     def length
       @events.length
     end
@@ -31,7 +35,11 @@ module TraceRuby
     end
 
     def next
-      @index += 1
+      move_bounded +1
+    end
+
+    def prev # FIXME untested
+      move_bounded -1
     end
 
     def to_first
@@ -54,6 +62,21 @@ module TraceRuby
         else proc { self.next }
         end
       )
+    end
+
+    # FIXME UNTESTED
+    private def move_bounded(offset)
+      @index += offset
+      to_last if after_last?
+      to_first if before_first?
+    end
+
+    private def before_first?
+      @index < 0
+    end
+
+    private def after_last?
+      length <= @index
     end
   end
 
@@ -99,6 +122,10 @@ module TraceRuby
       self
     end
 
+    def index
+      @cursor.index
+    end
+
     def prefix_each
       return to_enum :prefix_each unless block_given?
       depth = 0
@@ -122,12 +149,12 @@ module TraceRuby
     end
 
     def skip(matcher)
-      self.next while match_file?(matcher) && !at_end?
+      self.next while match_file?(matcher) && !@cursor.last?
     end
 
     def search_forward(matcher)
       matchers = []
-      matchers << -> { at_end? }
+      matchers << -> { @cursor.last? }
       matchers << -> { match_file?  matcher } if Regexp === matcher || String === matcher
       matchers << -> { match_event? matcher } if Symbol === matcher
       self.next
@@ -135,19 +162,7 @@ module TraceRuby
     end
 
     def search_backward(matcher)
-      self.prev until match_file?(matcher) || at_beginning?
-    end
-
-    private def move_bounded(index)
-      @index = index
-      to_last if after_last?
-      to_first if before_first?
-    end
-
-    private def wrap_index(offset)
-      @index += offset
-      to_last  if before_first?
-      to_first if after_last?
+      self.prev until match_file?(matcher) || @cursor.first?
     end
 
     private def match_file?(matcher)
@@ -156,22 +171,6 @@ module TraceRuby
 
     private def match_event?(event)
       crnt.fetch(:event) == event
-    end
-
-    private def at_beginning?
-      @index.zero?
-    end
-
-    private def at_end?
-      @cursor.length == @index.succ
-    end
-
-    private def before_first?
-      @index < 0
-    end
-
-    private def after_last?
-      @cursor.length <= @index
     end
   end
 end
