@@ -20,6 +20,7 @@ module TraceRuby
       @events.length
     end
 
+    include Enumerable
     def each(&block)
       @events.each(&block)
     end
