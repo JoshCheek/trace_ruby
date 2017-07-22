@@ -32,7 +32,7 @@ RSpec.describe 'Navigator allows for more sophisticated traversal over a stream'
     else raise "Unimplemented assertion: #{assertion.inspect}"
     end
   rescue RSpec::Expectations::ExpectationNotMetError
-    $!.set_backtrace caller.drop(1)
+    $!.set_backtrace caller.drop 1
     raise
   end
 
@@ -55,8 +55,39 @@ RSpec.describe 'Navigator allows for more sophisticated traversal over a stream'
     assert_crnt nav.to_index(2), lines[2]
   end
 
-  it 'can do depth-first traversal (execution order)'
   describe 'general tree traversal' do
+    def two_calls
+      methods = []
+      nav = record only: :methods do
+        m2 methods
+        m2 methods
+      end
+      return methods, nav
+    end
+
+    def three_deep
+      methods = []
+      nav = record do
+        m3 methods
+      end
+      return methods, nav
+    end
+
+    def m3(methods)
+      methods << [:call,   :m3, __LINE__-1]
+      m2 methods
+      methods << [:return, :m3, __LINE__+1]
+    end
+    def m2(methods)
+      methods << [:call,   :m2, __LINE__-1]
+      m1 methods
+      methods << [:return, :m2, __LINE__+1]
+    end
+    def m1(methods)
+      methods << [:call,   :m1, __LINE__-1]
+      methods << [:return, :m1, __LINE__+1]
+    end
+
     it 'can go into and out of method calls'
     it 'can go into and out of block calls'
     it 'can go into and out of class definitions'
@@ -65,6 +96,13 @@ RSpec.describe 'Navigator allows for more sophisticated traversal over a stream'
     it 'can\'t go in from a leaf'
     it 'can\'t go up from from the first line in a method call'
     it 'can\'t go down from the last line in a method call'
+
+    it 'can do prefix traversal (execution order)' do
+      methods, nav = two_calls
+      actuals = nav.prefix_each.map { |e| [e.event, e.method, e.lineno] }
+      expect(methods).to eq actuals
+    end
+
   end
 
   # search forward

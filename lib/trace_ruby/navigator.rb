@@ -42,14 +42,18 @@ module TraceRuby
       @index = length - 1
     end
 
+    def last?
+      @index == length - 1
+    end
+
     def to_index(index)
       disparity = index-@index
-      if disparity < 0
-        call = proc { self.prev }
-      else
-        call = proc { self.next }
-      end
-      disparity.abs.times &call
+      disparity.abs.times &(
+        if   disparity.negative?
+        then proc { self.prev }
+        else proc { self.next }
+        end
+      )
     end
   end
 
@@ -92,6 +96,28 @@ module TraceRuby
 
     def to_last
       @cursor.to_last
+      self
+    end
+
+    def prefix_each
+      return to_enum :prefix_each unless block_given?
+      depth = 0
+      loop do
+        yield crnt
+        if @cursor.last?
+          break
+        elsif depth.zero? && crnt.end?
+          break
+        elsif crnt.end?
+          depth -= 1
+          @cursor.next
+        elsif crnt.begin?
+          depth += 1
+          @cursor.next
+        else
+          @cursor.next
+        end
+      end
       self
     end
 
