@@ -8,7 +8,7 @@ module TraceRuby
       self.opts = opts
     end
     def call(env)
-      Record(**opts) { app.call env }
+      TraceRuby::Record(**opts) { app.call env }
     end
   end
 end
